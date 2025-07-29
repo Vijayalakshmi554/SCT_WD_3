@@ -1,52 +1,44 @@
-const questions = [
-  {
-    question: "What is the capital of India?",
-    options: ["Delhi", "Mumbai", "Kolkata", "Chennai"],
-    answer: "Delhi"
-  },
-  {
-    question: "2 + 2 = ?",
-    options: ["3", "4", "5", "6"],
-    answer: "4"
+let board = ["", "", "", "", "", "", "", "", ""];
+let currentPlayer = "X";
+let gameOver = false;
+
+function handleClick(index) {
+  if (board[index] === "" && !gameOver) {
+    board[index] = currentPlayer;
+    document.getElementsByClassName("cell")[index].textContent = currentPlayer;
+
+    if (checkWinner()) {
+      document.getElementById("status").textContent = `Player ${currentPlayer} wins!`;
+      gameOver = true;
+    } else if (board.every(cell => cell !== "")) {
+      document.getElementById("status").textContent = "It's a draw!";
+      gameOver = true;
+    } else {
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      document.getElementById("status").textContent = `Player ${currentPlayer}'s turn`;
+    }
   }
-];
+}
 
-let current = 0;
-let score = 0;
+function checkWinner() {
+  const winPatterns = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
 
-function loadQuestion() {
-  const q = questions[current];
-  document.getElementById("question").innerText = q.question;
-  const optionsDiv = document.getElementById("options");
-  optionsDiv.innerHTML = "";
-
-  q.options.forEach(opt => {
-    const btn = document.createElement("button");
-    btn.innerText = opt;
-    btn.classList.add("option");
-    btn.onclick = () => checkAnswer(opt);
-    optionsDiv.appendChild(btn);
+  return winPatterns.some(pattern => {
+    const [a,b,c] = pattern;
+    return board[a] && board[a] === board[b] && board[a] === board[c];
   });
 }
 
-function checkAnswer(selected) {
-  if (selected === questions[current].answer) {
-    score++;
-  }
-  current++;
-  if (current < questions.length) {
-    loadQuestion();
-  } else {
-    showResult();
-  }
+function resetGame() {
+  board = ["", "", "", "", "", "", "", "", ""];
+  gameOver = false;
+  currentPlayer = "X";
+  document.getElementById("status").textContent = `Player X's turn`;
+  Array.from(document.getElementsByClassName("cell")).forEach(cell => {
+    cell.textContent = "";
+  });
 }
-
-function showResult() {
-  document.getElementById("question").style.display = "none";
-  document.getElementById("options").style.display = "none";
-  document.getElementById("next").style.display = "none";
-  document.getElementById("result").innerText = `Your Score: ${score}/${questions.length}`;
-}
-
-document.getElementById("next").onclick = loadQuestion;
-loadQuestion();
